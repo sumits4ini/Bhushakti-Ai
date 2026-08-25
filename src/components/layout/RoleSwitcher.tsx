@@ -1,46 +1,15 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React from "react";
 import { UserRole } from "@/types/fieldReport";
 import { Shield, UserCheck, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/components/auth/AuthContext";
 
-interface RoleContextType {
-  role: UserRole;
-  setRole: (role: UserRole) => void;
-}
-
-const RoleContext = createContext<RoleContextType>({
-  role: "ADMIN",
-  setRole: () => {},
-});
-
-export const useUserRole = () => useContext(RoleContext);
-
-export function RoleProvider({ children }: { children: React.ReactNode }) {
-  const [role, setRoleState] = useState<UserRole>("ADMIN");
-
-  useEffect(() => {
-    const saved = localStorage.getItem("bhushakti_user_role") as UserRole;
-    if (saved && ["ADMIN", "FIELD_OFFICER", "CITIZEN"].includes(saved)) {
-      setRoleState(saved);
-    }
-  }, []);
-
-  const setRole = (newRole: UserRole) => {
-    setRoleState(newRole);
-    localStorage.setItem("bhushakti_user_role", newRole);
-  };
-
-  return (
-    <RoleContext.Provider value={{ role, setRole }}>
-      {children}
-    </RoleContext.Provider>
-  );
-}
+export { useAuth as useUserRole } from "@/components/auth/AuthContext";
 
 export function RoleSwitcher() {
-  const { role, setRole } = useUserRole();
+  const { role, switchRole } = useAuth();
 
   const roles: { value: UserRole; label: string; icon: React.ReactNode; color: string }[] = [
     {
@@ -70,7 +39,7 @@ export function RoleSwitcher() {
         return (
           <button
             key={r.value}
-            onClick={() => setRole(r.value)}
+            onClick={() => switchRole(r.value)}
             className={cn(
               "flex items-center gap-1.5 px-2.5 py-1 rounded-md transition-all font-medium",
               isActive

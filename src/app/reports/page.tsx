@@ -1,13 +1,41 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { PageShell } from "@/components/layout/PageShell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Camera, MapPin, CheckCircle, Clock, Eye, Sparkles, Filter } from "lucide-react";
-import { MOCK_FIELD_REPORTS } from "@/lib/demo";
+import { Camera, MapPin, CheckCircle, Clock, Eye, Sparkles, Filter, RefreshCw } from "lucide-react";
+import { reportRepository } from "@/services/reportRepository";
+import { FieldReport, ReportStatus } from "@/types/fieldReport";
 import { formatDate } from "@/lib/utils";
+import { useAuth } from "@/components/auth/AuthContext";
 
 export default function ReportsPage() {
+  const { role, user } = useAuth();
+  const [reports, setReports] = useState<FieldReport[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadReports = async () => {
+    setLoading(true);
+    try {
+      const data = await reportRepository.getAll();
+      setReports(data);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadReports();
+  }, []);
+
+  const handleVerify = async (reportId: string) => {
+    const verifiedBy = user?.fullName || (role === "ADMIN" ? "State Disaster Control Room" : "SDRF Field Officer");
+    await reportRepository.updateStatus(reportId, "VERIFIED", verifiedBy);
+    await loadReports();
+  };
+
   return (
     <PageShell>
       <div className="p-4 sm:p-6 space-y-6 max-w-7xl mx-auto w-full">
@@ -19,7 +47,7 @@ export default function ReportsPage() {
                 Field Reports & Ground Truth Inbox
               </h1>
               <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-700 dark:text-blue-400 font-mono font-semibold">
-                {MOCK_FIELD_REPORTS.length} SUBMISSIONS
+                {reports.length} SUBMISSIONS
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
@@ -28,6 +56,10 @@ export default function ReportsPage() {
           </div>
 
           <div className="flex items-center gap-2">
+            <Button size="sm" variant="outline" onClick={loadReports} className="gap-1.5 text-xs">
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
             <Button asChild size="sm" variant="critical" className="gap-1.5 text-xs">
               <Link href="/field-report">
                 <Camera className="w-3.5 h-3.5" />
@@ -39,7 +71,7 @@ export default function ReportsPage() {
 
         {/* Reports List */}
         <div className="space-y-4">
-          {MOCK_FIELD_REPORTS.map((report) => (
+          {reports.map((report) => (
             <Card key={report.id} className="border hover:border-primary/40 transition-colors">
               <CardHeader className="pb-3">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -50,7 +82,7 @@ export default function ReportsPage() {
                     <div>
                       <div className="flex items-center gap-2">
                         <CardTitle className="text-base font-bold text-foreground">
-                          {report.reportType.replace("_", " ")}: {report.districtName}
+                          {report.reportType.replace("_", " ")}: {report.districtName || "NER Zone"}
                         </CardTitle>
                         <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-muted text-muted-foreground">
                           {report.reporterRole}
@@ -121,14 +153,22 @@ export default function ReportsPage() {
                 <div className="flex items-center justify-between pt-2 border-t text-[11px] text-muted-foreground">
                   <div>
                     Submitted by: <strong>{report.reporterName}</strong> {report.reporterPhone && `(${report.reporterPhone})`}
+                    {report.verifiedBy && ` • Verified by ${report.verifiedBy}`}
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" className="h-7 text-xs">
-                      Inspect On Map
+                    <Button asChild variant="outline" size="sm" className="h-7 text-xs">
+                      <Link href="/map">Inspect On Map</Link>
                     </Button>
-                    <Button size="sm" variant="default" className="h-7 text-xs">
-                      Verify Report
-                    </Button>
+                    {report.status === "PENDING_VERIFICATION" && (role === "ADMIN" || role === "FIELD_OFFICER") && (
+                      <Button
+                        size="sm"
+                        variant="default"
+                        className="h-7 text-xs"
+                        onClick={() => handleVerify(report.id)}
+                      >
+                        Verify Report
+                      </Button>
+                    )}
                   </div>
                 </div>
               </CardContent>

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
-import { RoleProvider } from "./RoleSwitcher";
+import { AuthProvider } from "@/components/auth/AuthContext";
 import { cn } from "@/lib/utils";
 
 interface PageShellProps {
@@ -20,7 +20,7 @@ export function PageShell({
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <RoleProvider>
+    <AuthProvider>
       <div className="min-h-screen bg-background text-foreground flex flex-col antialiased">
         <Header
           onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
@@ -46,6 +46,6 @@ export function PageShell({
           </main>
         </div>
       </div>
-    </RoleProvider>
+    </AuthProvider>
   );
 }

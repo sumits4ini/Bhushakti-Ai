@@ -4,6 +4,7 @@ export * from './fieldReport';
 export * from './alert';
 export * from './responseTask';
 export * from './weather';
+export * from './auth';
 
 export interface AppNotification {
   id: string;

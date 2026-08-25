@@ -1,6 +1,8 @@
 import { Coordinate } from './geo';
 import { ResponsePriority } from './alert';
 
+export type { ResponsePriority } from './alert';
+
 export type TaskStatus = 'PENDING_DISPATCH' | 'DEPLOYED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 
 export type ActionType =

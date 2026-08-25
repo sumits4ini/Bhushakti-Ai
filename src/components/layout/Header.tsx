@@ -2,12 +2,13 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Mountain, Menu, X, ShieldAlert, Camera, Globe2 } from "lucide-react";
+import { Mountain, Menu, X, Camera, Globe2, LogIn, LogOut, User } from "lucide-react";
 import { APP_CONFIG } from "@/lib/config/site";
 import { ThemeToggle } from "./ThemeToggle";
 import { RoleSwitcher } from "./RoleSwitcher";
 import { LiveStatusIndicator } from "./LiveStatusIndicator";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/components/auth/AuthContext";
 
 interface HeaderProps {
   onToggleSidebar?: () => void;
@@ -15,6 +16,7 @@ interface HeaderProps {
 }
 
 export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
+  const { user, role, logout } = useAuth();
   const [lang, setLang] = useState<"en" | "hi">("en");
 
   const toggleLanguage = () => {
@@ -76,6 +78,32 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
           {/* Role Switcher */}
           <div className="hidden md:block">
             <RoleSwitcher />
+          </div>
+
+          {/* User Profile / Login Action */}
+          <div className="hidden sm:flex items-center">
+            {user && role !== "CITIZEN" ? (
+              <div className="flex items-center gap-1.5 pl-2 border-l">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => logout()}
+                  className="h-8 px-2 text-xs gap-1 text-muted-foreground hover:text-rose-500"
+                  title={`Signed in as ${user.fullName} (${role}) — Click to Logout`}
+                >
+                  <User className="w-3.5 h-3.5 text-primary" />
+                  <span className="hidden xl:inline truncate max-w-[140px]">{user.fullName.split(" ")[0]}</span>
+                  <LogOut className="w-3 h-3 ml-0.5 opacity-60 hover:opacity-100" />
+                </Button>
+              </div>
+            ) : (
+              <Button asChild variant="outline" size="sm" className="h-8 text-xs gap-1">
+                <Link href="/login">
+                  <LogIn className="w-3.5 h-3.5" />
+                  <span>Sign In</span>
+                </Link>
+              </Button>
+            )}
           </div>
 
           {/* Language Toggle (EN / HI) */}
