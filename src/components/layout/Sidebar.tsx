@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { APP_CONFIG } from "@/lib/config/site";
 import { useUserRole } from "./RoleSwitcher";
+import { useI18n } from "@/components/i18n/I18nContext";
 import { cn } from "@/lib/utils";
 
 const ICONS: Record<string, React.ReactNode> = {
@@ -42,6 +43,22 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { role } = useUserRole();
+  const { t } = useI18n();
+
+  const getRouteTitle = (href: string, defaultTitle: string) => {
+    switch (href) {
+      case "/dashboard": return t.navDashboard;
+      case "/map": return t.navMap;
+      case "/risk": return t.navRisk;
+      case "/forecast": return t.navForecast;
+      case "/reports": return t.navReports;
+      case "/alerts": return t.navAlerts;
+      case "/response": return t.navResponse;
+      case "/settings": return t.navSettings;
+      case "/field-report": return t.navFieldReport;
+      default: return defaultTitle;
+    }
+  };
 
   const filteredRoutes = APP_CONFIG.routes.filter(
     (route) => !route.roles || route.roles.includes(role)
@@ -74,6 +91,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             {filteredRoutes.map((route) => {
               const isActive = pathname === route.href;
               const icon = ICONS[route.iconName] || <Info className="w-4 h-4" />;
+              const title = getRouteTitle(route.href, route.title);
 
               return (
                 <Link
@@ -103,7 +121,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                     >
                       {icon}
                     </span>
-                    <span>{route.title}</span>
+                    <span>{title}</span>
                   </div>
 
                   {route.badge && (

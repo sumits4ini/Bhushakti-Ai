@@ -12,6 +12,7 @@ import {
   Sparkles,
   CheckCircle2,
   Wifi,
+  WifiOff,
   ArrowRight,
   ShieldAlert,
   AlertTriangle,
@@ -20,9 +21,12 @@ import {
   Image as ImageIcon,
   Check,
   Radio,
+  Save,
 } from "lucide-react";
 import { useAuth } from "@/components/auth/AuthContext";
+import { useI18n } from "@/components/i18n/I18nContext";
 import { fieldSubmissionPipeline, PipelineExecutionResult } from "@/services/fieldSubmissionPipeline";
+import { offlineQueue } from "@/lib/offline/offlineQueue";
 import { ReportType, ReportSeverity } from "@/types/fieldReport";
 
 const SAMPLE_TERRAIN_PHOTOS = [
@@ -48,6 +52,7 @@ const SAMPLE_TERRAIN_PHOTOS = [
 
 export default function FieldReportPage() {
   const { role, user } = useAuth();
+  const { t } = useI18n();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [location, setLocation] = useState<{ lat: number; lng: number }>({
@@ -65,6 +70,7 @@ export default function FieldReportPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(SAMPLE_TERRAIN_PHOTOS[0].url);
 
   const [submitting, setSubmitting] = useState(false);
+  const [offlineSaved, setOfflineSaved] = useState(false);
   const [gpsLoading, setGpsLoading] = useState(false);
   const [gpsSuccess, setGpsSuccess] = useState(false);
   const [pipelineResult, setPipelineResult] = useState<PipelineExecutionResult | null>(null);
@@ -84,7 +90,6 @@ export default function FieldReportPage() {
           setTimeout(() => setGpsSuccess(false), 3000);
         },
         () => {
-          // Fallback to realistic Aizawl GPS on error/refusal
           setLocation({ lat: 23.7385, lng: 92.7092 });
           setGpsLoading(false);
           setGpsSuccess(true);
@@ -102,7 +107,6 @@ export default function FieldReportPage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
       alert("File size exceeds 10MB limit. Please upload a smaller image.");
       return;
@@ -117,7 +121,6 @@ export default function FieldReportPage() {
     reader.readAsDataURL(file);
   };
 
-  // Quick Preset Sample Selection
   const handleSelectSamplePhoto = (sample: (typeof SAMPLE_TERRAIN_PHOTOS)[0]) => {
     setImagePreview(sample.url);
     setReportType(sample.type);
@@ -134,9 +137,38 @@ export default function FieldReportPage() {
     }
   };
 
+  // Save to offline queue manually or when offline
+  const handleSaveOffline = () => {
+    offlineQueue.enqueue({
+      reporterRole: role,
+      reporterName: user?.fullName || (role === "FIELD_OFFICER" ? "Inspector L. Sailo" : "Local Citizen"),
+      reporterPhone: user?.phone || "+91 94361 00000",
+      districtName,
+      location: { latitude: location.lat, longitude: location.lng },
+      locationAddress,
+      reportType,
+      severity,
+      observedCracks: hasCracks,
+      slopeMovementDetected: hasCracks || reportType === "SLOPE_MOVEMENT",
+      roadBlocked: isRoadBlocked,
+      roadBlockageDegree: isRoadBlocked ? roadBlockageDegree : "CLEAR",
+      description: description || "Ground shear observation captured in offline mode.",
+      media: [],
+      status: role === "CITIZEN" ? "PENDING_VERIFICATION" : "VERIFIED",
+    });
+
+    setOfflineSaved(true);
+  };
+
   // Form Submit Handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (typeof window !== "undefined" && !navigator.onLine) {
+      handleSaveOffline();
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -159,7 +191,8 @@ export default function FieldReportPage() {
 
       setPipelineResult(result);
     } catch (err) {
-      console.error("Submission failed:", err);
+      console.warn("Online submission failed, enqueuing offline:", err);
+      handleSaveOffline();
     } finally {
       setSubmitting(false);
     }
@@ -173,22 +206,53 @@ export default function FieldReportPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
-                Field Incident Report & Vision Inspection
+                {t.fieldReportTitle}
               </h1>
             </div>
             {/* Low Network / Offline Sync Badge */}
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs font-mono font-bold">
               <Wifi className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
-              <span>2G/3G Low-Bandwidth Mode</span>
+              <span>Offline-Sync Ready</span>
             </div>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Submit geo-tagged ground photos, crack measurements, and road blockage reports to update the AI Hazard Index in real time.
+            {t.fieldReportSubtitle}
           </p>
         </div>
 
-        {pipelineResult ? (
-          /* PIPELINE SUCCESS & EXECUTION RESULTS CARD */
+        {offlineSaved ? (
+          /* OFFLINE QUEUE CONFIRMATION CARD */
+          <Card className="border-amber-500/50 bg-amber-500/10 p-6 space-y-4 text-center shadow-xl animate-in zoom-in-95">
+            <div className="w-12 h-12 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center mx-auto">
+              <Save className="w-7 h-7" />
+            </div>
+            <div>
+              <h3 className="text-lg font-black text-foreground">
+                Report Saved to Offline Storage Queue
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto">
+                Your geo-tagged observations and measurements have been safely preserved in local device memory. They will automatically synchronize to the disaster command center when cellular connection returns.
+              </p>
+            </div>
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-xs"
+                onClick={() => {
+                  setOfflineSaved(false);
+                  setDescription("");
+                }}
+              >
+                Create Another Offline Draft
+              </Button>
+              <Button asChild size="sm" variant="default" className="text-xs">
+                <Link href="/reports">View Local Feed →</Link>
+              </Button>
+            </div>
+          </Card>
+        ) : pipelineResult ? (
+          /* PIPELINE SUCCESS CARD */
           <Card className="border-emerald-500/50 bg-emerald-500/5 p-5 sm:p-6 space-y-5 shadow-2xl animate-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
@@ -273,39 +337,39 @@ export default function FieldReportPage() {
             <Card className="border">
               <CardHeader className="p-4 pb-2">
                 <CardTitle className="text-sm font-bold text-foreground">
-                  1. Incident Classification
+                  {t.stepClassification}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4 space-y-3 text-xs">
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {[
-                    { id: "CRACK", label: "Slope Crack", icon: "⚡" },
-                    { id: "SLOPE_MOVEMENT", label: "Ground Slump", icon: "⛰️" },
-                    { id: "ROAD_BLOCKED", label: "Road Blocked", icon: "🚧" },
-                    { id: "ROCKFALL", label: "Rockfall", icon: "🪨" },
-                    { id: "DEBRIS", label: "Debris Flow", icon: "🌊" },
-                    { id: "EROSION", label: "Toe Erosion", icon: "💧" },
-                    { id: "OTHER", label: "Other Hazard", icon: "⚠️" },
-                  ].map((t) => (
+                    { id: "CRACK", label: t.reportTypeCrack, icon: "⚡" },
+                    { id: "SLOPE_MOVEMENT", label: t.reportTypeSlump, icon: "⛰️" },
+                    { id: "ROAD_BLOCKED", label: t.reportTypeBlocked, icon: "🚧" },
+                    { id: "ROCKFALL", label: t.reportTypeRockfall, icon: "🪨" },
+                    { id: "DEBRIS", label: t.reportTypeDebris, icon: "🌊" },
+                    { id: "EROSION", label: t.reportTypeErosion, icon: "💧" },
+                    { id: "OTHER", label: t.reportTypeOther, icon: "⚠️" },
+                  ].map((tItem) => (
                     <button
                       type="button"
-                      key={t.id}
+                      key={tItem.id}
                       onClick={() => {
-                        setReportType(t.id as ReportType);
-                        if (t.id === "ROAD_BLOCKED") {
+                        setReportType(tItem.id as ReportType);
+                        if (tItem.id === "ROAD_BLOCKED") {
                           setIsRoadBlocked(true);
                           setRoadBlockageDegree("COMPLETE");
                         }
-                        if (t.id === "CRACK") setHasCracks(true);
+                        if (tItem.id === "CRACK") setHasCracks(true);
                       }}
-                      className={`p-3 rounded-xl border text-left flex flex-col justify-between min-h-[64px] transition-all ${
-                        reportType === t.id
+                      className={`p-3 rounded-xl border text-left flex flex-col justify-between min-h-[64px] transition-all focus-visible:ring-2 focus-visible:ring-primary ${
+                        reportType === tItem.id
                           ? "bg-primary text-primary-foreground font-bold border-primary shadow-md scale-[1.02]"
                           : "bg-card hover:bg-accent text-foreground"
                       }`}
                     >
-                      <span className="text-base">{t.icon}</span>
-                      <span className="text-xs mt-1">{t.label}</span>
+                      <span className="text-base">{tItem.icon}</span>
+                      <span className="text-xs mt-1">{tItem.label}</span>
                     </button>
                   ))}
                 </div>
@@ -318,7 +382,7 @@ export default function FieldReportPage() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
                     <Camera className="w-4 h-4 text-primary" />
-                    2. Ground Photo & AI Vision
+                    {t.stepPhoto}
                   </CardTitle>
                   <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-primary/10 text-primary font-bold">
                     Prototype Vision Analysis
@@ -379,7 +443,7 @@ export default function FieldReportPage() {
                       <Camera className="w-6 h-6" />
                     </div>
                     <span className="font-bold text-foreground text-sm">
-                      Tap to Open Camera or Choose Photo
+                      {t.photoUploadPrompt}
                     </span>
                     <span className="text-[11px] text-muted-foreground mt-0.5">
                       JPEG, PNG, WebP (Auto-compressed for low-bandwidth 2G)
@@ -414,7 +478,7 @@ export default function FieldReportPage() {
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-primary" />
-                    3. Geolocation & Landmark
+                    {t.stepLocation}
                   </CardTitle>
                   <Button
                     type="button"
@@ -425,7 +489,7 @@ export default function FieldReportPage() {
                     disabled={gpsLoading}
                   >
                     <Navigation className={`w-3.5 h-3.5 ${gpsLoading ? "animate-spin" : ""}`} />
-                    {gpsSuccess ? "GPS Captured!" : "Use Device GPS"}
+                    {gpsSuccess ? t.gpsCaptured : t.useGpsBtn}
                   </Button>
                 </div>
               </CardHeader>
@@ -460,7 +524,7 @@ export default function FieldReportPage() {
             <Card className="border">
               <CardHeader className="p-4 pb-2">
                 <CardTitle className="text-sm font-bold text-foreground">
-                  4. Ground Observations & Structural Details
+                  {t.stepObservations}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-4 space-y-3 text-xs">
@@ -472,7 +536,7 @@ export default function FieldReportPage() {
                       onChange={(e) => setHasCracks(e.target.checked)}
                       className="w-4 h-4 rounded text-primary accent-primary"
                     />
-                    <span className="font-medium text-foreground">Visible Tension Cracks Observed</span>
+                    <span className="font-medium text-foreground">{t.tensionCracksCheck}</span>
                   </label>
 
                   <label className="flex items-center gap-2 p-3 rounded-lg border bg-card cursor-pointer hover:bg-accent/40">
@@ -482,7 +546,7 @@ export default function FieldReportPage() {
                       onChange={(e) => setIsRoadBlocked(e.target.checked)}
                       className="w-4 h-4 rounded text-primary accent-primary"
                     />
-                    <span className="font-medium text-foreground">Highway / Roadway Obstructed</span>
+                    <span className="font-medium text-foreground">{t.roadBlockedCheck}</span>
                   </label>
                 </div>
 
@@ -520,7 +584,7 @@ export default function FieldReportPage() {
 
                 <div>
                   <label className="font-semibold text-foreground block mb-1">
-                    Notes & Field Description:
+                    {t.notesLabel}
                   </label>
                   <textarea
                     rows={3}
@@ -534,15 +598,27 @@ export default function FieldReportPage() {
             </Card>
 
             {/* Mobile Action Bar */}
-            <div className="pt-2">
+            <div className="pt-2 flex flex-col sm:flex-row gap-2.5">
               <Button
                 type="submit"
                 size="lg"
                 variant="critical"
                 disabled={submitting}
-                className="w-full h-12 text-sm font-bold shadow-xl flex items-center justify-center gap-2"
+                className="flex-1 h-12 text-sm font-bold shadow-xl flex items-center justify-center gap-2"
               >
-                {submitting ? "Processing Through AI Pipeline..." : "Submit Field Report to Command Center"}
+                {submitting ? t.submittingText : t.submitReportBtn}
+              </Button>
+
+              <Button
+                type="button"
+                variant="outline"
+                size="lg"
+                onClick={handleSaveOffline}
+                className="h-12 text-xs font-bold gap-1.5"
+                title="Preserve observation in local IndexedDB storage queue"
+              >
+                <Save className="w-4 h-4" />
+                {t.saveOfflineBtn}
               </Button>
             </div>
           </form>

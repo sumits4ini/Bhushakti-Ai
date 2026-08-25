@@ -1,15 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { Mountain, Menu, X, Camera, Globe2, LogIn, LogOut, User } from "lucide-react";
-import { APP_CONFIG } from "@/lib/config/site";
 import { ThemeToggle } from "./ThemeToggle";
 import { RoleSwitcher } from "./RoleSwitcher";
 import { LiveStatusIndicator } from "./LiveStatusIndicator";
 import { NotificationBell } from "@/components/common/NotificationBell";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/AuthContext";
+import { useI18n } from "@/components/i18n/I18nContext";
 
 interface HeaderProps {
   onToggleSidebar?: () => void;
@@ -18,11 +18,7 @@ interface HeaderProps {
 
 export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
   const { user, role, logout } = useAuth();
-  const [lang, setLang] = useState<"en" | "hi">("en");
-
-  const toggleLanguage = () => {
-    setLang((prev) => (prev === "en" ? "hi" : "en"));
-  };
+  const { language, toggleLanguage, t } = useI18n();
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
@@ -48,14 +44,14 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
             <div>
               <div className="flex items-center gap-2">
                 <span className="font-extrabold text-base tracking-tight text-foreground">
-                  {APP_CONFIG.name}
+                  {t.appName}
                 </span>
-                <span className="text-xs px-1.5 py-0.5 rounded bg-primary/10 text-primary font-semibold hidden sm:inline">
+                <span className="text-xs px-1.5 py-0.5 rounded bg-primary/10 text-primary font-semibold hidden sm:inline font-mono">
                   NER
                 </span>
               </div>
               <p className="text-[10px] text-muted-foreground font-medium hidden sm:block truncate max-w-[280px]">
-                {APP_CONFIG.ministry}
+                {t.ministryName}
               </p>
             </div>
           </Link>
@@ -72,7 +68,7 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
           <Button asChild size="sm" variant="critical" className="gap-1.5 text-xs shadow-sm">
             <Link href="/field-report">
               <Camera className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Field Report</span>
+              <span className="hidden sm:inline">{t.navFieldReport}</span>
             </Link>
           </Button>
 
@@ -110,16 +106,17 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
             )}
           </div>
 
-          {/* Language Toggle (EN / HI) */}
+          {/* Language Toggle (EN / हिन्दी) */}
           <Button
             variant="outline"
             size="sm"
             onClick={toggleLanguage}
-            className="h-8 px-2.5 text-xs gap-1 text-muted-foreground hover:text-foreground font-mono"
-            title="Toggle Language (English / Hindi)"
+            className="h-8 px-2.5 text-xs gap-1 text-muted-foreground hover:text-foreground font-semibold"
+            title="Toggle Language (English / हिन्दी)"
+            aria-label="Toggle Language"
           >
             <Globe2 className="w-3.5 h-3.5 text-primary" />
-            <span>{lang.toUpperCase()}</span>
+            <span>{language === "en" ? "हिन्दी" : "EN"}</span>
           </Button>
 
           {/* Dark / Light Toggle */}
