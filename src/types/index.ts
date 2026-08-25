@@ -7,6 +7,7 @@ export * from './weather';
 export * from './auth';
 export * from './riskEngine';
 export * from './vision';
+export * from './notification';
 
 export interface AppNotification {
   id: string;

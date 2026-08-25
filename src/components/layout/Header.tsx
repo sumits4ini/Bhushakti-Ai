@@ -7,6 +7,7 @@ import { APP_CONFIG } from "@/lib/config/site";
 import { ThemeToggle } from "./ThemeToggle";
 import { RoleSwitcher } from "./RoleSwitcher";
 import { LiveStatusIndicator } from "./LiveStatusIndicator";
+import { NotificationBell } from "@/components/common/NotificationBell";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/components/auth/AuthContext";
 
@@ -65,8 +66,8 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
           <LiveStatusIndicator />
         </div>
 
-        {/* Right: Actions, Language, Role & Theme */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        {/* Right: Actions, Language, Notifications, Role & Theme */}
+        <div className="flex items-center gap-2 sm:gap-2.5">
           {/* Quick Citizen / Officer Reporting CTA */}
           <Button asChild size="sm" variant="critical" className="gap-1.5 text-xs shadow-sm">
             <Link href="/field-report">
@@ -74,6 +75,9 @@ export function Header({ onToggleSidebar, sidebarOpen }: HeaderProps) {
               <span className="hidden sm:inline">Field Report</span>
             </Link>
           </Button>
+
+          {/* In-App Notifications Bell */}
+          <NotificationBell />
 
           {/* Role Switcher */}
           <div className="hidden md:block">
