@@ -43,6 +43,15 @@ export const APP_CONFIG = {
       roles: ["ADMIN", "FIELD_OFFICER"],
     },
     {
+      title: "Disaster Simulation",
+      href: "/simulation",
+      iconName: "Flame",
+      badge: "DEMO",
+      badgeVariant: "critical",
+      highlight: true,
+      roles: ["ADMIN", "FIELD_OFFICER", "CITIZEN"],
+    },
+    {
       title: "GIS Risk Map",
       href: "/map",
       iconName: "Map",

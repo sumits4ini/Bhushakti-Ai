@@ -125,7 +125,13 @@ export default function DashboardPage() {
               selectedKey={selectedDistrictKey}
               onSelectDistrict={handleSelectDistrict}
             />
-            <Button asChild size="sm" variant="critical" className="gap-1.5 text-xs font-bold shadow-md">
+            <Button asChild size="sm" variant="default" className="gap-1.5 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white shadow-md">
+              <Link href="/simulation">
+                <Flame className="w-3.5 h-3.5 fill-current" />
+                Live Simulation
+              </Link>
+            </Button>
+            <Button asChild size="sm" variant="outline" className="gap-1.5 text-xs font-bold">
               <Link href="/field-report">
                 <Camera className="w-3.5 h-3.5" />
                 Submit Observation

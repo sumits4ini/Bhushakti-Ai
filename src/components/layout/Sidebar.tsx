@@ -16,6 +16,7 @@ import {
   Home,
   Info,
   Radio,
+  Flame,
 } from "lucide-react";
 import { APP_CONFIG } from "@/lib/config/site";
 import { useUserRole } from "./RoleSwitcher";
@@ -33,6 +34,7 @@ const ICONS: Record<string, React.ReactNode> = {
   CloudRain: <CloudRain className="w-4 h-4" />,
   Camera: <Camera className="w-4 h-4" />,
   Settings: <Settings className="w-4 h-4" />,
+  Flame: <Flame className="w-4 h-4 text-rose-500" />,
 };
 
 interface SidebarProps {
@@ -43,11 +45,12 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { role } = useUserRole();
-  const { t } = useI18n();
+  const { t, language } = useI18n();
 
   const getRouteTitle = (href: string, defaultTitle: string) => {
     switch (href) {
       case "/dashboard": return t.navDashboard;
+      case "/simulation": return language === "hi" ? "आपदा सिमुलेशन" : "Disaster Simulation";
       case "/map": return t.navMap;
       case "/risk": return t.navRisk;
       case "/forecast": return t.navForecast;
