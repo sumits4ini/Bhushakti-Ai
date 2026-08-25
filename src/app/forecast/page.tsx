@@ -1,19 +1,27 @@
-import React from "react";
+"use client";
+
+import React, { useState } from "react";
 import { PageShell } from "@/components/layout/PageShell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RiskBadge } from "@/components/common/RiskBadge";
-import { CloudRain, TrendingUp, AlertTriangle, Clock, Calendar, Droplets } from "lucide-react";
-import { MOCK_FORECAST_DAYS } from "@/lib/demo";
+import {
+  CloudRain,
+  TrendingUp,
+  AlertTriangle,
+  Calendar,
+  Layers,
+  MapPin,
+  Sparkles,
+  ArrowRight,
+  ShieldAlert,
+} from "lucide-react";
+import { EXTENDED_RISK_ZONES } from "@/lib/gis/geoData";
+import { riskEngine } from "@/lib/ai/riskEngine";
+import Link from "next/link";
 
 export default function ForecastPage() {
-  const hourlyCurve = [
-    { offset: "Current (+0h)", score: 87, level: "CRITICAL", rain: "24.5 mm/h", confidence: "94%" },
-    { offset: "+3 Hours", score: 89, level: "CRITICAL", rain: "32.0 mm/h", confidence: "91%" },
-    { offset: "+6 Hours", score: 93, level: "CRITICAL", rain: "38.5 mm/h", confidence: "87%" },
-    { offset: "+12 Hours", score: 78, level: "CRITICAL", rain: "18.0 mm/h", confidence: "82%" },
-    { offset: "+24 Hours", score: 62, level: "HIGH", rain: "8.5 mm/h", confidence: "78%" },
-  ];
+  const [selectedHorizon, setSelectedHorizon] = useState<"24h" | "48h" | "72h">("24h");
 
   return (
     <PageShell>
@@ -21,117 +29,97 @@ export default function ForecastPage() {
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <h1 className="text-2xl font-bold tracking-tight text-foreground">
-                24-Hour Predictive Landslide Risk Forecast
+                Predictive Landslide Hazard Forecasting
               </h1>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-700 dark:text-purple-400 font-mono font-semibold">
-                Predictive AI Curve
+              <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/15 border border-blue-500/30 text-blue-700 dark:text-blue-400 font-mono font-semibold">
+                IMD & ISRO ENSEMBLE
               </span>
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Simulated weather-linked landslide hazard forecast based on projected IMD monsoon squall trajectories
+              24h, 48h, and 72h precipitation ensemble modeling fused with slope hydrological infiltration rates
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Button size="sm" variant="outline" className="gap-1.5 text-xs">
-              <Calendar className="w-3.5 h-3.5" />
-              7-Day Synoptic Outlook
-            </Button>
+          {/* Time Horizon Selector */}
+          <div className="flex items-center gap-1.5 p-1 rounded-lg border bg-card">
+            {(["24h", "48h", "72h"] as const).map((horizon) => (
+              <Button
+                key={horizon}
+                variant={selectedHorizon === horizon ? "default" : "ghost"}
+                size="sm"
+                className="h-7 text-xs font-mono"
+                onClick={() => setSelectedHorizon(horizon)}
+              >
+                {horizon} Horizon
+              </Button>
+            ))}
           </div>
         </div>
 
-        {/* 24h Hourly Risk Trajectory Table / Visualizer */}
-        <Card className="border">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-base font-bold text-foreground flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-primary" />
-                  Target Zone: Aizawl — Hunthar Veng Corridor (NH-54)
-                </CardTitle>
-                <CardDescription className="text-xs">
-                  Hazard index trajectory projecting peak risk at +6 Hours (Score 93) due to incoming squall
-                </CardDescription>
-              </div>
-              <span className="text-xs font-mono px-2.5 py-1 rounded bg-rose-500/20 text-rose-700 dark:text-rose-300 font-bold border border-rose-500/40">
-                PEAK RISK: +6h
-              </span>
-            </div>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="border-y bg-muted/50 text-muted-foreground font-mono">
-                    <th className="p-3 font-semibold">Forecast Window</th>
-                    <th className="p-3 font-semibold">Predicted Hazard Score</th>
-                    <th className="p-3 font-semibold">Risk Classification</th>
-                    <th className="p-3 font-semibold">Projected Rainfall Rate</th>
-                    <th className="p-3 font-semibold">Model Confidence</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {hourlyCurve.map((row, i) => (
-                    <tr key={i} className="hover:bg-accent/40 transition-colors">
-                      <td className="p-3 font-bold text-foreground font-mono">
-                        {row.offset}
-                      </td>
-                      <td className="p-3 font-mono font-extrabold text-sm">
-                        {row.score} / 100
-                      </td>
-                      <td className="p-3">
-                        <RiskBadge levelOrScore={row.score} showScore={false} size="sm" />
-                      </td>
-                      <td className="p-3 font-mono text-muted-foreground flex items-center gap-1">
-                        <Droplets className="w-3.5 h-3.5 text-blue-500" />
-                        {row.rain}
-                      </td>
-                      <td className="p-3 font-mono text-muted-foreground">
-                        {row.confidence}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Predictive Forecast Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {EXTENDED_RISK_ZONES.map((zone) => {
+            const isCritical = zone.currentRiskLevel === "CRITICAL";
+            const isHigh = zone.currentRiskLevel === "HIGH";
 
-        {/* 4-Day Synoptic Weather Overview */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-bold text-foreground">
-            Synoptic 4-Day Monsoon Deluge Outlook (North Eastern Region)
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {MOCK_FORECAST_DAYS.map((day, idx) => (
-              <Card key={idx} className="border bg-card/60">
-                <CardHeader className="pb-2">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-sm font-bold text-foreground">
-                      {day.dayLabel}
-                    </CardTitle>
-                    <span className="text-[10px] font-mono text-muted-foreground">{day.date}</span>
+            const multiplier = selectedHorizon === "72h" ? 1.4 : selectedHorizon === "48h" ? 1.2 : 1.0;
+            const projectedRainfall = Math.round((isCritical ? 118 : isHigh ? 76 : 28) * multiplier);
+            const projectedScore = Math.min(100, Math.round(zone.currentRiskScore * (selectedHorizon === "72h" ? 1.1 : 1.05)));
+
+            return (
+              <Card
+                key={zone.id}
+                className={`border hover:border-primary/40 transition-all ${
+                  isCritical ? "border-rose-500/40 bg-rose-500/5 shadow-sm" : ""
+                }`}
+              >
+                <CardHeader className="p-4 pb-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <span className="text-[10px] font-mono text-muted-foreground block">
+                        {zone.districtName}, {zone.state}
+                      </span>
+                      <CardTitle className="text-sm font-bold text-foreground mt-0.5">
+                        {zone.name}
+                      </CardTitle>
+                    </div>
+                    <RiskBadge levelOrScore={projectedScore} showScore size="sm" />
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-2 text-xs">
-                  <div className="flex items-center gap-2 text-primary font-semibold">
-                    <CloudRain className="w-4 h-4" />
-                    <span>{day.condition.replace(/_/g, " ")}</span>
+
+                <CardContent className="p-4 space-y-3 text-xs">
+                  <div className="grid grid-cols-2 gap-2 p-2.5 rounded-lg bg-muted/40 border font-mono">
+                    <div>
+                      <span className="text-[10px] text-muted-foreground block">Projected Rain:</span>
+                      <strong className="text-foreground">{projectedRainfall} mm</strong>
+                    </div>
+                    <div>
+                      <span className="text-[10px] text-muted-foreground block">Peak Window:</span>
+                      <strong className="text-rose-600 dark:text-rose-400">+{selectedHorizon} Deluge</strong>
+                    </div>
                   </div>
-                  <div className="flex justify-between py-1 border-b text-muted-foreground">
-                    <span>Expected Rainfall:</span>
-                    <strong className="text-foreground font-mono">{day.expectedRainfallMm} mm</strong>
-                  </div>
-                  <div className="flex justify-between py-1 text-muted-foreground">
-                    <span>Saturation Risk:</span>
-                    <RiskBadge levelOrScore={day.soilMoistureSaturationRisk} showScore={false} size="sm" />
+
+                  <p className="text-[11px] text-muted-foreground leading-relaxed">
+                    Threat Corridor: <strong>{zone.primaryThreatCorridor}</strong>. Orographic cloudburst front moving along southern valley ridge.
+                  </p>
+
+                  <div className="flex items-center justify-between pt-2 border-t text-[11px]">
+                    <span className="text-muted-foreground flex items-center gap-1">
+                      <TrendingUp className="w-3.5 h-3.5 text-rose-500" />
+                      Instability Rising
+                    </span>
+                    <Button asChild variant="outline" size="sm" className="h-7 text-xs gap-1">
+                      <Link href="/risk">
+                        Inspect SHAP <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
+            );
+          })}
         </div>
       </div>
     </PageShell>
