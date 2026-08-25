@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { PageShell } from "@/components/layout/PageShell";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RiskBadge } from "@/components/common/RiskBadge";
 import {
@@ -25,26 +25,40 @@ import {
   Clock,
   Layers,
   ArrowRight,
-  Info,
   Check,
   Send,
   Zap,
+  Activity,
+  Mountain,
+  Truck,
+  CheckCircle,
 } from "lucide-react";
 import { AIZAWL_DISASTER_SCENARIO, SimulationStep } from "@/lib/simulation/disasterScenario";
-import { formatDate } from "@/lib/utils";
+
+const TIMESTAMPS = [
+  "14:00",
+  "18:00",
+  "22:00",
+  "02:00",
+  "06:00",
+  "10:00",
+  "14:00",
+  "14:01",
+  "14:02",
+];
 
 export default function DisasterSimulationPage() {
   const [currentStepIndex, setCurrentStepIndex] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1); // 1x, 1.5x, 2x
+  const [playbackSpeed, setPlaybackSpeed] = useState<number>(1);
 
   const activeStep: SimulationStep = AIZAWL_DISASTER_SCENARIO[currentStepIndex];
 
-  // Auto-play interval
+  // Auto-advance loop
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (isPlaying) {
-      const intervalMs = 4500 / playbackSpeed;
+      const intervalMs = 4200 / playbackSpeed;
       timer = setInterval(() => {
         setCurrentStepIndex((prev) => {
           if (prev >= AIZAWL_DISASTER_SCENARIO.length - 1) {
@@ -78,33 +92,35 @@ export default function DisasterSimulationPage() {
   return (
     <PageShell>
       <div className="p-3 sm:p-6 space-y-5 max-w-7xl mx-auto w-full pb-16">
-        {/* Top Header & Simulation Controls */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-4">
+        {/* TOP COMMAND HEADER & PLAYER CONTROLS */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/80 pb-4">
           <div>
             <div className="flex items-center gap-2.5">
-              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground flex items-center gap-2">
-                <Flame className="w-6 h-6 text-rose-500 animate-pulse" />
-                Live Disaster Simulation Mode
+              <div className="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-500 flex items-center justify-center border border-rose-500/30">
+                <Flame className="w-5 h-5 animate-pulse" />
+              </div>
+              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">
+                Disaster Simulation Control Room
               </h1>
-              <span className="text-xs px-2.5 py-0.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-700 dark:text-rose-400 font-mono font-bold flex items-center gap-1.5">
+              <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-700 dark:text-rose-400 font-mono font-bold flex items-center gap-1.5 shadow-xs">
                 <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-                DETERMINISTIC DEMO
+                LIVE SIMULATION ACTIVE
               </span>
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Demonstrating the full autonomous sequence: Environmental Infiltration → AI Inference → Field CV → P1 Red Alert & Response
+            <p className="text-xs text-muted-foreground mt-1">
+              Scenario: Extreme Monsoon Cloudburst & Highway Severance — Aizawl NH-54 Corridor
             </p>
           </div>
 
-          {/* Player Controls Bar */}
-          <div className="flex flex-wrap items-center gap-2 bg-card/90 border p-1.5 rounded-xl shadow-md">
+          {/* Player Controls Deck */}
+          <div className="flex flex-wrap items-center gap-2 bg-card/90 border border-border/80 p-1.5 rounded-xl shadow-md">
             <Button
               variant="outline"
               size="icon"
               className="h-8 w-8"
               onClick={handlePrev}
               disabled={currentStepIndex === 0}
-              title="Previous Step"
+              title="Previous Stage"
             >
               <SkipBack className="w-3.5 h-3.5" />
             </Button>
@@ -118,12 +134,12 @@ export default function DisasterSimulationPage() {
               {isPlaying ? (
                 <>
                   <Pause className="w-3.5 h-3.5 fill-current" />
-                  Pause
+                  PAUSE
                 </>
               ) : (
                 <>
                   <Play className="w-3.5 h-3.5 fill-current" />
-                  {currentStepIndex >= AIZAWL_DISASTER_SCENARIO.length - 1 ? "Replay" : "Play"}
+                  {currentStepIndex >= AIZAWL_DISASTER_SCENARIO.length - 1 ? "REPLAY" : "START SIMULATION"}
                 </>
               )}
             </Button>
@@ -134,7 +150,7 @@ export default function DisasterSimulationPage() {
               className="h-8 w-8"
               onClick={handleNext}
               disabled={currentStepIndex >= AIZAWL_DISASTER_SCENARIO.length - 1}
-              title="Next Step"
+              title="Next Stage"
             >
               <SkipForward className="w-3.5 h-3.5" />
             </Button>
@@ -144,13 +160,13 @@ export default function DisasterSimulationPage() {
               size="icon"
               className="h-8 w-8 text-muted-foreground hover:text-foreground"
               onClick={handleRestart}
-              title="Restart Simulation to Step 0"
+              title="Restart Simulation"
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </Button>
 
             {/* Speed Selector */}
-            <div className="border-l pl-2 flex items-center gap-1 font-mono text-[11px]">
+            <div className="border-l border-border/80 pl-2 flex items-center gap-1 font-mono text-[11px]">
               {[1, 1.5, 2].map((spd) => (
                 <button
                   key={spd}
@@ -168,16 +184,20 @@ export default function DisasterSimulationPage() {
           </div>
         </div>
 
-        {/* 8-STAGE TIMELINE TRACK */}
-        <div className="p-3.5 rounded-xl border bg-card/80 shadow-inner space-y-2">
+        {/* 8-STAGE INTERACTIVE TIMELINE */}
+        <div className="p-3.5 rounded-xl border border-border/80 bg-card/80 shadow-md space-y-2.5">
           <div className="flex items-center justify-between text-[11px] font-mono font-bold text-muted-foreground">
-            <span>SCENARIO TIMELINE: EXTREME RAINFALL — AIZAWL (NH-54)</span>
-            <span className="text-foreground">
-              Stage {activeStep.stepNumber} of {AIZAWL_DISASTER_SCENARIO.length - 1}
+            <span className="flex items-center gap-1.5 text-foreground">
+              <Clock className="w-3.5 h-3.5 text-primary" />
+              SIMULATION TIMELINE & ACTION SEQUENCE
+            </span>
+            <span>
+              Stage {activeStep.stepNumber} of {AIZAWL_DISASTER_SCENARIO.length - 1} (
+              {Math.round((activeStep.stepNumber / (AIZAWL_DISASTER_SCENARIO.length - 1)) * 100)}% Progress)
             </span>
           </div>
 
-          <div className="grid grid-cols-4 sm:grid-cols-9 gap-1.5">
+          <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-1.5">
             {AIZAWL_DISASTER_SCENARIO.map((step, idx) => {
               const isCurrent = idx === currentStepIndex;
               const isPassed = idx < currentStepIndex;
@@ -189,20 +209,24 @@ export default function DisasterSimulationPage() {
                     setIsPlaying(false);
                     setCurrentStepIndex(idx);
                   }}
-                  className={`p-2 rounded-lg text-left border transition-all text-xs ${
+                  className={`p-2.5 rounded-lg text-left border transition-all text-xs flex flex-col justify-between min-h-[64px] ${
                     isCurrent
-                      ? "bg-primary text-primary-foreground font-bold border-primary shadow-md scale-105 ring-2 ring-primary/40"
+                      ? "bg-primary text-primary-foreground font-bold border-primary shadow-md scale-[1.03] ring-2 ring-primary/40"
                       : isPassed
-                      ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-semibold"
+                      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-semibold"
                       : "bg-muted/40 text-muted-foreground hover:bg-muted"
                   }`}
                 >
-                  <div className="font-mono text-[10px] flex items-center justify-between">
-                    <span>#{step.stepNumber}</span>
-                    {isPassed && <Check className="w-3 h-3 text-emerald-500" />}
+                  <div className="font-mono text-[10px] flex items-center justify-between w-full">
+                    <span>{TIMESTAMPS[idx]}</span>
+                    {isPassed ? (
+                      <Check className="w-3 h-3 text-emerald-500" />
+                    ) : isCurrent ? (
+                      <span className="w-2 h-2 rounded-full bg-white animate-ping" />
+                    ) : null}
                   </div>
-                  <div className="text-[10px] truncate mt-0.5">
-                    {step.telemetry.riskScore}/100
+                  <div className="text-[10px] truncate mt-1">
+                    {step.telemetry.riskScore}/100 • {step.telemetry.riskLevel}
                   </div>
                 </button>
               );
@@ -210,19 +234,111 @@ export default function DisasterSimulationPage() {
           </div>
         </div>
 
-        {/* MAIN STAGE WORKSPACE: Left Story & Telemetry + Right Dynamic Visual Viewport */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Column: Stage Narrative & Real-Time Sensors (5 cols) */}
+        {/* 6 TOP TELEMETRY CARDS */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <Card className="border border-border/80 bg-card">
+            <CardContent className="p-3 space-y-1">
+              <span className="text-[10px] font-mono uppercase text-muted-foreground flex items-center gap-1">
+                <CloudRain className="w-3.5 h-3.5 text-blue-500" />
+                Rainfall (24h)
+              </span>
+              <div className="text-xl font-black font-mono text-foreground">
+                {activeStep.telemetry.rainfall24h} mm
+              </div>
+              <span className="text-[10px] text-muted-foreground font-mono">
+                Intensity: {activeStep.telemetry.rainfall1h} mm/h
+              </span>
+            </CardContent>
+          </Card>
+
+          <Card className="border border-border/80 bg-card">
+            <CardContent className="p-3 space-y-1">
+              <span className="text-[10px] font-mono uppercase text-muted-foreground flex items-center gap-1">
+                <Droplets className="w-3.5 h-3.5 text-teal-500" />
+                Soil Moisture
+              </span>
+              <div className="text-xl font-black font-mono text-foreground">
+                {activeStep.telemetry.soilMoisturePct}%
+              </div>
+              <span className="text-[10px] text-muted-foreground font-mono">
+                Pore Saturation
+              </span>
+            </CardContent>
+          </Card>
+
+          <Card className="border border-border/80 bg-card">
+            <CardContent className="p-3 space-y-1">
+              <span className="text-[10px] font-mono uppercase text-muted-foreground flex items-center gap-1">
+                <Mountain className="w-3.5 h-3.5 text-amber-500" />
+                Slope Gradient
+              </span>
+              <div className="text-xl font-black font-mono text-foreground">
+                {activeStep.telemetry.slopeAngleDeg}°
+              </div>
+              <span className="text-[10px] text-muted-foreground font-mono">
+                Steep Escarpment
+              </span>
+            </CardContent>
+          </Card>
+
+          <Card className="border border-border/80 bg-card">
+            <CardContent className="p-3 space-y-1">
+              <span className="text-[10px] font-mono uppercase text-muted-foreground flex items-center gap-1">
+                <Activity className="w-3.5 h-3.5 text-rose-500" />
+                Hazard Score
+              </span>
+              <div className="text-xl font-black font-mono text-foreground">
+                {activeStep.telemetry.riskScore} / 100
+              </div>
+              <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 font-mono">
+                {activeStep.telemetry.trend}
+              </span>
+            </CardContent>
+          </Card>
+
+          <Card className="border border-border/80 bg-card">
+            <CardContent className="p-3 space-y-1">
+              <span className="text-[10px] font-mono uppercase text-muted-foreground flex items-center gap-1">
+                <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+                AI Confidence
+              </span>
+              <div className="text-xl font-black font-mono text-foreground">
+                94%
+              </div>
+              <span className="text-[10px] text-muted-foreground font-mono">
+                Multimodal Model
+              </span>
+            </CardContent>
+          </Card>
+
+          <Card className="border border-border/80 bg-card">
+            <CardContent className="p-3 space-y-1">
+              <span className="text-[10px] font-mono uppercase text-muted-foreground flex items-center gap-1">
+                <ShieldAlert className="w-3.5 h-3.5 text-rose-500" />
+                Alert Level
+              </span>
+              <div className="pt-0.5">
+                <RiskBadge levelOrScore={activeStep.telemetry.riskScore} showScore={false} size="sm" />
+              </div>
+              <span className="text-[10px] text-muted-foreground font-mono block truncate">
+                {activeStep.telemetry.riskScore >= 76 ? "P1 Immediate" : "Advisory"}
+              </span>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* MAIN STAGE WORKSPACE: 5 Cols Left (Narrative) + 7 Cols Right (Visual Viewport) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          {/* Left Column: Narrative & Physics Trigger */}
           <div className="lg:col-span-5 space-y-4">
-            {/* Active Step Narrative Card */}
-            <Card className="border bg-card shadow-md">
-              <CardHeader className="p-4 pb-2 border-b bg-muted/40">
+            <Card className="border border-border/80 bg-card shadow-md">
+              <CardHeader className="p-4 pb-2 border-b bg-muted/30">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-primary/10 text-primary uppercase">
                     {activeStep.phaseLabel.replace(/_/g, " ")}
                   </span>
                   <span className="text-[10px] text-muted-foreground font-mono">
-                    Hunthar Veng, Aizawl
+                    Hunthar Veng Sector
                   </span>
                 </div>
                 <CardTitle className="text-base font-extrabold text-foreground mt-1">
@@ -235,8 +351,8 @@ export default function DisasterSimulationPage() {
                   {activeStep.description}
                 </p>
 
-                {/* Highlighted Physics / Model Trigger */}
-                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/25 text-foreground leading-relaxed flex items-start gap-2">
+                {/* Highlighted Physics / Model Activation Trigger */}
+                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/25 text-foreground leading-relaxed flex items-start gap-2.5">
                   <Sparkles className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                   <div>
                     <strong className="text-amber-700 dark:text-amber-300 font-bold block mb-0.5">
@@ -248,76 +364,78 @@ export default function DisasterSimulationPage() {
               </CardContent>
             </Card>
 
-            {/* Live Telemetry Gauges Grid */}
-            <Card className="border bg-card shadow-md">
+            {/* Explainable Factor Contribution Breakdown */}
+            <Card className="border border-border/80 bg-card shadow-md">
               <CardHeader className="p-4 pb-2 border-b">
                 <CardTitle className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  Synchronized Telemetry Sensors (Live)
+                  SHAP Factor Point Attribution (Score: {activeStep.telemetry.riskScore}/100)
                 </CardTitle>
               </CardHeader>
 
               <CardContent className="p-4 space-y-3 text-xs font-mono">
-                {/* Hero Hazard Score */}
-                <div className="p-3 rounded-xl border bg-background shadow-inner flex items-center justify-between">
+                <div className="space-y-2">
                   <div>
-                    <span className="text-[10px] uppercase text-muted-foreground block font-bold">
-                      Hazard Index ($LHI$)
-                    </span>
-                    <div className="flex items-baseline gap-1.5 mt-0.5">
-                      <span className="text-3xl font-black text-foreground">
-                        {activeStep.telemetry.riskScore}
-                      </span>
-                      <span className="text-muted-foreground">/ 100</span>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span>Heavy Rainfall Surge</span>
+                      <strong className="text-rose-500">
+                        +{activeStep.telemetry.riskScore >= 67 ? "29.0" : "12.0"} pts
+                      </strong>
+                    </div>
+                    <div className="w-full bg-muted/60 rounded-full h-2 overflow-hidden">
+                      <div
+                        className="bg-rose-500 h-full transition-all duration-500 rounded-full"
+                        style={{ width: `${Math.min(100, (activeStep.telemetry.rainfall24h / 120) * 100)}%` }}
+                      />
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-end gap-1">
-                    <RiskBadge levelOrScore={activeStep.telemetry.riskScore} showScore={false} size="md" />
-                    <span className="text-[10px] font-bold text-rose-600 dark:text-rose-400 flex items-center gap-1">
-                      <TrendingUp className="w-3 h-3" />
-                      {activeStep.telemetry.trend}
-                    </span>
-                  </div>
-                </div>
-
-                {/* 24h Rain & Soil Moisture */}
-                <div className="grid grid-cols-2 gap-2.5">
-                  <div className="p-2.5 rounded-lg border bg-muted/40 space-y-1">
-                    <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                      <CloudRain className="w-3 h-3 text-blue-500" />
-                      24h Rainfall
-                    </span>
-                    <strong className="text-base text-foreground block">
-                      {activeStep.telemetry.rainfall24h} mm
-                    </strong>
-                    <span className="text-[9px] text-muted-foreground block">
-                      (1h: {activeStep.telemetry.rainfall1h} mm/h)
-                    </span>
+                  <div>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span>Subsoil Saturation</span>
+                      <strong className="text-orange-500">
+                        +{activeStep.telemetry.soilMoisturePct >= 76 ? "21.0" : "14.0"} pts
+                      </strong>
+                    </div>
+                    <div className="w-full bg-muted/60 rounded-full h-2 overflow-hidden">
+                      <div
+                        className="bg-orange-500 h-full transition-all duration-500 rounded-full"
+                        style={{ width: `${activeStep.telemetry.soilMoisturePct}%` }}
+                      />
+                    </div>
                   </div>
 
-                  <div className="p-2.5 rounded-lg border bg-muted/40 space-y-1">
-                    <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                      <Droplets className="w-3 h-3 text-teal-500" />
-                      Soil Moisture
-                    </span>
-                    <strong className="text-base text-foreground block">
-                      {activeStep.telemetry.soilMoisturePct}%
-                    </strong>
-                    <span className="text-[9px] text-muted-foreground block">
-                      Pore pressure surge
-                    </span>
+                  <div>
+                    <div className="flex justify-between text-[11px] mb-1">
+                      <span>Steep Slope (38.5°)</span>
+                      <strong className="text-amber-500">+18.0 pts</strong>
+                    </div>
+                    <div className="w-full bg-muted/60 rounded-full h-2 overflow-hidden">
+                      <div className="bg-amber-500 h-full rounded-full" style={{ width: "75%" }} />
+                    </div>
                   </div>
+
+                  {activeStep.fieldReportData && (
+                    <div>
+                      <div className="flex justify-between text-[11px] mb-1">
+                        <span>Ground Crack Telemetry</span>
+                        <strong className="text-purple-500">+7.5 pts</strong>
+                      </div>
+                      <div className="w-full bg-muted/60 rounded-full h-2 overflow-hidden">
+                        <div className="bg-purple-500 h-full rounded-full" style={{ width: "85%" }} />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
           </div>
 
-          {/* Right Column: Contextual Visual Viewport (7 cols) */}
+          {/* Right Column: Dynamic Visual Screen */}
           <div className="lg:col-span-7 space-y-4">
             {/* Viewport 1: Field Photo with AI CV Bounding Box (Steps 4 & 5) */}
             {activeStep.fieldReportData || activeStep.visionDetection ? (
-              <Card className="border bg-card shadow-xl overflow-hidden animate-in fade-in duration-300">
-                <CardHeader className="p-4 border-b bg-muted/40 flex flex-row items-center justify-between">
+              <Card className="border border-border/80 bg-card shadow-xl overflow-hidden animate-in fade-in duration-300">
+                <CardHeader className="p-4 border-b bg-muted/30 flex flex-row items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Camera className="w-4 h-4 text-primary" />
                     <CardTitle className="text-sm font-bold text-foreground">
@@ -331,7 +449,7 @@ export default function DisasterSimulationPage() {
 
                 <CardContent className="p-4 space-y-3 text-xs">
                   {/* Photo with Bounding Box Overlay */}
-                  <div className="relative rounded-xl overflow-hidden border bg-black max-h-72 flex items-center justify-center">
+                  <div className="relative rounded-xl overflow-hidden border border-border/80 bg-black max-h-72 flex items-center justify-center">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={activeStep.fieldReportData?.photoUrl || "https://images.unsplash.com/photo-1541888946425-d0fbb18086f6?auto=format&fit=crop&w=600&q=80"}
@@ -341,16 +459,16 @@ export default function DisasterSimulationPage() {
 
                     {/* Simulated CV Bounding Box */}
                     <div className="absolute top-12 left-1/4 right-1/4 bottom-16 border-2 border-rose-500 bg-rose-500/20 rounded shadow-lg animate-pulse flex flex-col justify-between p-1.5 pointer-events-none">
-                      <span className="bg-rose-600 text-white font-mono text-[9px] px-1 py-0.2 rounded font-bold self-start">
+                      <span className="bg-rose-600 text-white font-mono text-[9px] px-1.5 py-0.2 rounded font-bold self-start">
                         [CRACK] Transverse Shear (12cm) 94%
                       </span>
-                      <span className="bg-black/75 text-rose-300 font-mono text-[9px] px-1 py-0.2 rounded self-end">
+                      <span className="bg-black/85 text-rose-300 font-mono text-[9px] px-1.5 py-0.2 rounded self-end">
                         Severity: CRITICAL (+7.5 pts)
                       </span>
                     </div>
                   </div>
 
-                  <div className="p-3 rounded-lg bg-muted/40 border space-y-1">
+                  <div className="p-3 rounded-lg bg-muted/30 border border-border/80 space-y-1">
                     <div className="flex items-center justify-between text-[11px] font-semibold text-foreground">
                       <span>Submitted by: {activeStep.fieldReportData?.reporter || "Inspector L. Sailo"}</span>
                       <span className="font-mono text-muted-foreground">NH-54 milestone 14</span>
@@ -363,7 +481,7 @@ export default function DisasterSimulationPage() {
               </Card>
             ) : activeStep.alertPayload ? (
               /* Viewport 2: Emergency Red Alert Broadcast Banner (Step 7) */
-              <Card className="border-rose-500/50 bg-rose-500/5 shadow-2xl p-5 space-y-4 animate-in zoom-in-95 duration-300">
+              <Card className="border border-rose-500/50 bg-rose-500/5 shadow-2xl p-5 space-y-4 animate-in zoom-in-95 duration-300">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl bg-rose-500/20 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 animate-bounce">
                     <ShieldAlert className="w-7 h-7" />
@@ -378,7 +496,7 @@ export default function DisasterSimulationPage() {
                   </div>
                 </div>
 
-                <div className="p-3.5 rounded-xl border bg-card/90 space-y-2 text-xs">
+                <div className="p-3.5 rounded-xl border border-border/80 bg-card/90 space-y-2 text-xs">
                   <div className="grid grid-cols-2 gap-2 font-mono text-[11px]">
                     <div>
                       <span className="text-muted-foreground block text-[10px]">Threat Corridor:</span>
@@ -390,7 +508,7 @@ export default function DisasterSimulationPage() {
                     </div>
                   </div>
 
-                  <div className="pt-2 border-t text-[11px] space-y-1">
+                  <div className="pt-2 border-t border-border/80 text-[11px] space-y-1">
                     <strong className="text-foreground block">Autonomous Broadcast Channels:</strong>
                     <div className="flex flex-wrap gap-2 text-emerald-600 dark:text-emerald-400 font-semibold font-mono text-[10px]">
                       <span>✓ In-App SDMA Console</span>
@@ -402,7 +520,7 @@ export default function DisasterSimulationPage() {
               </Card>
             ) : activeStep.taskPayload ? (
               /* Viewport 3: P1 Response Task Dispatch Ticket (Step 8) */
-              <Card className="border-blue-500/50 bg-blue-500/5 shadow-2xl p-5 space-y-4 animate-in zoom-in-95 duration-300">
+              <Card className="border border-blue-500/50 bg-blue-500/5 shadow-2xl p-5 space-y-4 animate-in zoom-in-95 duration-300">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="p-2 rounded-lg bg-blue-500/20 text-blue-600 dark:text-blue-400">
@@ -422,7 +540,7 @@ export default function DisasterSimulationPage() {
                   </span>
                 </div>
 
-                <div className="p-3.5 rounded-xl border bg-card/90 space-y-3 text-xs">
+                <div className="p-3.5 rounded-xl border border-border/80 bg-card/90 space-y-3 text-xs">
                   <div className="grid grid-cols-2 gap-2 font-mono text-[11px]">
                     <div>
                       <span className="text-muted-foreground block text-[10px]">Assigned Agency:</span>
@@ -434,7 +552,7 @@ export default function DisasterSimulationPage() {
                     </div>
                   </div>
 
-                  <div className="space-y-1.5 pt-2 border-t">
+                  <div className="space-y-1.5 pt-2 border-t border-border/80">
                     <span className="font-bold text-foreground block text-[11px]">
                       Mandatory Tactical Directives:
                     </span>
@@ -451,22 +569,22 @@ export default function DisasterSimulationPage() {
               </Card>
             ) : (
               /* Viewport 4: Baseline GIS Map Context (Steps 0–3) */
-              <Card className="border bg-card shadow-md p-5 space-y-4">
+              <Card className="border border-border/80 bg-card shadow-md p-5 space-y-4">
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-sm font-bold text-foreground flex items-center gap-2">
                       <MapPin className="w-4 h-4 text-primary" />
                       Geospatial Risk Hotspot (Hunthar Veng Corridor, Aizawl)
                     </CardTitle>
-                    <CardDescription className="text-xs">
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       Coordinates: 23.7385° N, 92.7092° E • NH-54 Highway Sector
-                    </CardDescription>
+                    </p>
                   </div>
                   <RiskBadge levelOrScore={activeStep.telemetry.riskScore} showScore size="sm" />
                 </div>
 
                 {/* Tactical Mini GIS Visual Card */}
-                <div className="h-64 rounded-xl border bg-slate-950 p-4 relative overflow-hidden flex flex-col justify-between shadow-inner">
+                <div className="h-64 rounded-xl border border-border/80 bg-slate-950 p-4 relative overflow-hidden flex flex-col justify-between shadow-inner">
                   {/* Grid Lines */}
                   <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293720_1px,transparent_1px),linear-gradient(to_bottom,#1f293720_1px,transparent_1px)] bg-[size:24px_24px]" />
 
@@ -494,8 +612,8 @@ export default function DisasterSimulationPage() {
           </div>
         </div>
 
-        {/* BOTTOM HACKATHON SUMMARY BAR */}
-        <div className="p-4 rounded-xl border bg-muted/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        {/* BOTTOM SUMMARY FOOTER */}
+        <div className="p-4 rounded-xl border border-border/80 bg-card/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-sm">
           <div>
             <strong className="text-foreground block">
               Smart India Hackathon 2026 Presentation Ready:
@@ -506,7 +624,7 @@ export default function DisasterSimulationPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button asChild variant="outline" size="sm" className="text-xs">
+            <Button asChild variant="outline" size="sm" className="text-xs font-bold">
               <Link href="/dashboard">Command Center</Link>
             </Button>
             <Button asChild variant="default" size="sm" className="text-xs gap-1.5 font-bold shadow-md">

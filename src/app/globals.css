@@ -4,6 +4,7 @@
 
 @layer base {
   :root {
+    /* High-contrast Light Mode fallback */
     --background: 210 40% 98%;
     --foreground: 222 47% 11%;
 
@@ -13,14 +14,14 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 217 91% 32%; /* Deep Navy Gov Blue */
+    --primary: 217 91% 36%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 214 32% 91%;
     --secondary-foreground: 222 47% 11%;
 
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 210 40% 95%;
+    --muted-foreground: 215 20% 45%;
 
     --accent: 210 40% 92%;
     --accent-foreground: 222 47% 11%;
@@ -28,83 +29,85 @@
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214 32% 88%;
-    --input: 214 32% 88%;
-    --ring: 217 91% 32%;
+    --border: 214 32% 85%;
+    --input: 214 32% 85%;
+    --ring: 217 91% 36%;
 
     --radius: 0.5rem;
 
     /* Disaster & Landslide Risk Tokens */
-    --risk-low: 158 64% 40%;          /* #10b981 emerald */
+    --risk-low: 158 64% 40%;
     --risk-low-foreground: 160 84% 20%;
     --risk-low-muted: 152 57% 92%;
     --risk-low-border: 158 64% 60%;
 
-    --risk-moderate: 38 92% 50%;      /* #f59e0b amber */
+    --risk-moderate: 38 92% 50%;
     --risk-moderate-foreground: 32 95% 25%;
     --risk-moderate-muted: 45 93% 94%;
     --risk-moderate-border: 38 92% 65%;
 
-    --risk-high: 25 95% 53%;          /* #f97316 orange */
+    --risk-high: 25 95% 53%;
     --risk-high-foreground: 20 90% 25%;
     --risk-high-muted: 33 100% 94%;
     --risk-high-border: 25 95% 65%;
 
-    --risk-critical: 347 87% 55%;     /* #f43f5e rose/red */
+    --risk-critical: 347 87% 55%;
     --risk-critical-foreground: 350 89% 25%;
     --risk-critical-muted: 355 100% 95%;
     --risk-critical-border: 347 87% 65%;
   }
 
-  .dark {
-    --background: 222 47% 7%;         /* Sleek obsidian dark */
-    --foreground: 210 40% 98%;
+  /* Primary Presentation Mode: Dark-First Disaster Command Center (Navy/Charcoal) */
+  .dark,
+  :root[class~="dark"] {
+    --background: 222 47% 6%;         /* #060b13 Deep Navy Charcoal */
+    --foreground: 210 40% 98%;         /* #f8fafc Clean High-Contrast White */
 
-    --card: 222 47% 10%;
+    --card: 222 40% 9%;               /* #0c1524 Crisp Surface Card */
     --card-foreground: 210 40% 98%;
 
-    --popover: 222 47% 9%;
+    --popover: 222 40% 8%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217 91% 60%;
-    --primary-foreground: 222 47% 11%;
+    --primary: 217 91% 60%;            /* #3b82f6 Government Blue */
+    --primary-foreground: 222 47% 6%;
 
-    --secondary: 217 33% 17%;
+    --secondary: 217 33% 15%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217 33% 15%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 217 33% 13%;
+    --muted-foreground: 215 20% 65%;   /* #94a3b8 Slate Muted */
 
-    --accent: 217 33% 18%;
+    --accent: 217 33% 16%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217 33% 18%;
-    --input: 217 33% 18%;
+    --border: 217 30% 16%;            /* Subtle Slate Border #1a2538 */
+    --input: 217 30% 16%;
     --ring: 217 91% 60%;
 
-    /* Dark Mode Risk Tokens (Vibrant & Legible against obsidian) */
-    --risk-low: 158 75% 45%;
-    --risk-low-foreground: 152 76% 80%;
-    --risk-low-muted: 160 84% 12%;
-    --risk-low-border: 158 64% 35%;
+    /* Standardized High-Legibility Risk Tokens */
+    --risk-low: 158 75% 45%;          /* #10b981 */
+    --risk-low-foreground: 152 76% 85%;
+    --risk-low-muted: 160 84% 10%;
+    --risk-low-border: 158 64% 30%;
 
-    --risk-moderate: 38 92% 52%;
+    --risk-moderate: 38 92% 52%;      /* #f59e0b */
     --risk-moderate-foreground: 45 93% 85%;
-    --risk-moderate-muted: 35 90% 12%;
-    --risk-moderate-border: 38 92% 35%;
+    --risk-moderate-muted: 35 90% 10%;
+    --risk-moderate-border: 38 92% 30%;
 
-    --risk-high: 25 95% 56%;
+    --risk-high: 25 95% 56%;          /* #f97316 */
     --risk-high-foreground: 33 100% 88%;
-    --risk-high-muted: 20 90% 14%;
-    --risk-high-border: 25 95% 40%;
+    --risk-high-muted: 20 90% 12%;
+    --risk-high-border: 25 95% 35%;
 
-    --risk-critical: 347 90% 60%;
+    --risk-critical: 347 90% 60%;     /* #ef4444 */
     --risk-critical-foreground: 355 100% 92%;
-    --risk-critical-muted: 350 89% 15%;
-    --risk-critical-border: 347 87% 45%;
+    --risk-critical-muted: 350 89% 12%;
+    --risk-critical-border: 347 87% 40%;
   }
 }
 
@@ -112,9 +115,26 @@
   * {
     @apply border-border;
   }
+  html {
+    @apply bg-background text-foreground antialiased;
+    color-scheme: dark;
+  }
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
+    @apply bg-background text-foreground font-sans antialiased selection:bg-primary/25 selection:text-primary min-h-screen;
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Reset links & buttons to eliminate browser-default unstyled appearance */
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: none;
+  }
+  button {
+    font-family: inherit;
+    font-size: inherit;
   }
 }
 
@@ -127,9 +147,28 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: hsl(var(--muted-foreground) / 0.3);
+  background: hsl(var(--muted-foreground) / 0.25);
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: hsl(var(--muted-foreground) / 0.5);
+  background: hsl(var(--muted-foreground) / 0.45);
+}
+
+/* Leaflet Container Fixes */
+.leaflet-container {
+  width: 100% !important;
+  height: 100% !important;
+  background-color: #060b13 !important;
+  font-family: inherit !important;
+  z-index: 10;
+}
+.leaflet-popup-content-wrapper {
+  background-color: #0c1524 !important;
+  color: #f8fafc !important;
+  border: 1px solid #1a2538 !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5) !important;
+}
+.leaflet-popup-tip {
+  background-color: #0c1524 !important;
 }
