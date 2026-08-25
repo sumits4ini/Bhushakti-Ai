@@ -158,21 +158,6 @@ The application includes an instant **1-Click Persona Switcher** in the top navi
 
 ---
 
-## 🎯 9. Recommended 3-Minute Hackathon Demo Flow for Judges
-
-1. **Minute 1: The Problem & GIS Command Center (`/` $\to$ `/dashboard`)**
-   - Open Landing Page to highlight the **SIH26001 / MDoNER** mandate.
-   - Jump to Command Center: show the interactive Leaflet map of the 8 NER states.
-   - Click **Aizawl (Hunthar Veng / NH-54)**: showcase the right-side **WHY** (SHAP factor point breakdown) and **WHAT** (recommended directives) panel.
-2. **Minute 2: Explainable AI & Field Computer Vision (`/risk` $\to$ `/field-report`)**
-   - Navigate to `/risk`: drag the **24h Rainfall** slider from $42\text{mm} \to 118\text{mm}$ to demonstrate instant $<15\text{ms}$ risk index recalculation.
-   - Open `/field-report`: demonstrate mobile-first submission with 1-click device GPS capture, sample test photo, and **Prototype AI Vision** crack detection.
-3. **Minute 3: Disaster Simulation & Tactical Response (`/simulation` $\to$ `/response`)**
-   - Navigate to `/simulation`: hit **"START SIMULATION"** to run the deterministic 8-stage Aizawl cloudburst scenario.
-   - Show the sequence: *Rainfall Surge $\to$ Soil Saturation $\to$ Field Crack $\to$ AI Recalibration ($89/100$) $\to$ P1 Red Alert $\to$ Automated SDRF Dispatch*.
-   - Click the **`हिन्दी`** button in the header to demonstrate full bilingual localization.
-
----
 
 ## 🏛️ Government Attribution & Disclaimer
 
