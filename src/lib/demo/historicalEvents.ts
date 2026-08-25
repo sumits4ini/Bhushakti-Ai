@@ -1,0 +1,40 @@
+import { HistoricalLandslideEvent } from "@/types/geo";
+
+export const MOCK_HISTORICAL_EVENTS: HistoricalLandslideEvent[] = [
+  {
+    id: "hist-01",
+    districtId: "dist-aizawl",
+    locationName: "Laipuitlang Sinking Ridge",
+    coordinates: { latitude: 23.7428, longitude: 92.7231 },
+    incidentDate: "2013-05-11",
+    severity: "CATASTROPHIC",
+    fatalities: 17,
+    displacedCount: 240,
+    triggerFactor: "72h continuous pre-monsoon squall + unengineered building slope load",
+    infrastructureDamage: "11 multi-storey buildings collapsed; PWD link severed",
+  },
+  {
+    id: "hist-02",
+    districtId: "dist-gangtok",
+    locationName: "29th Mile National Highway 10",
+    coordinates: { latitude: 27.2144, longitude: 88.5238 },
+    incidentDate: "2023-10-04",
+    severity: "CATASTROPHIC",
+    fatalities: 22,
+    displacedCount: 1500,
+    triggerFactor: "Teesta basin flash flood + saturated schist toe washout",
+    infrastructureDamage: "1.2 km of NH-10 highway washed into river basin; bridge destroyed",
+  },
+  {
+    id: "hist-03",
+    districtId: "dist-east-khasi",
+    locationName: "Cherrapunjee-Mawsmai Escarpment",
+    coordinates: { latitude: 25.2892, longitude: 91.7324 },
+    incidentDate: "2022-06-17",
+    severity: "MAJOR",
+    fatalities: 5,
+    displacedCount: 85,
+    triggerFactor: "Extreme 972mm 24-hour deluge",
+    infrastructureDamage: "SH-5 blocked for 9 days; telecommunication optical cable snapped",
+  },
+];

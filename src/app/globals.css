@@ -1,0 +1,135 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 217 91% 32%; /* Deep Navy Gov Blue */
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 214 32% 91%;
+    --secondary-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 210 40% 92%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214 32% 88%;
+    --input: 214 32% 88%;
+    --ring: 217 91% 32%;
+
+    --radius: 0.5rem;
+
+    /* Disaster & Landslide Risk Tokens */
+    --risk-low: 158 64% 40%;          /* #10b981 emerald */
+    --risk-low-foreground: 160 84% 20%;
+    --risk-low-muted: 152 57% 92%;
+    --risk-low-border: 158 64% 60%;
+
+    --risk-moderate: 38 92% 50%;      /* #f59e0b amber */
+    --risk-moderate-foreground: 32 95% 25%;
+    --risk-moderate-muted: 45 93% 94%;
+    --risk-moderate-border: 38 92% 65%;
+
+    --risk-high: 25 95% 53%;          /* #f97316 orange */
+    --risk-high-foreground: 20 90% 25%;
+    --risk-high-muted: 33 100% 94%;
+    --risk-high-border: 25 95% 65%;
+
+    --risk-critical: 347 87% 55%;     /* #f43f5e rose/red */
+    --risk-critical-foreground: 350 89% 25%;
+    --risk-critical-muted: 355 100% 95%;
+    --risk-critical-border: 347 87% 65%;
+  }
+
+  .dark {
+    --background: 222 47% 7%;         /* Sleek obsidian dark */
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 10%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 15%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 217 33% 18%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 33% 18%;
+    --input: 217 33% 18%;
+    --ring: 217 91% 60%;
+
+    /* Dark Mode Risk Tokens (Vibrant & Legible against obsidian) */
+    --risk-low: 158 75% 45%;
+    --risk-low-foreground: 152 76% 80%;
+    --risk-low-muted: 160 84% 12%;
+    --risk-low-border: 158 64% 35%;
+
+    --risk-moderate: 38 92% 52%;
+    --risk-moderate-foreground: 45 93% 85%;
+    --risk-moderate-muted: 35 90% 12%;
+    --risk-moderate-border: 38 92% 35%;
+
+    --risk-high: 25 95% 56%;
+    --risk-high-foreground: 33 100% 88%;
+    --risk-high-muted: 20 90% 14%;
+    --risk-high-border: 25 95% 40%;
+
+    --risk-critical: 347 90% 60%;
+    --risk-critical-foreground: 355 100% 92%;
+    --risk-critical-muted: 350 89% 15%;
+    --risk-critical-border: 347 87% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Custom Tactical Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
