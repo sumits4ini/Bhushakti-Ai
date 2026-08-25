@@ -6,6 +6,7 @@ export * from './responseTask';
 export * from './weather';
 export * from './auth';
 export * from './riskEngine';
+export * from './vision';
 
 export interface AppNotification {
   id: string;
